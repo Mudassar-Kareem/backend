@@ -1,15 +1,16 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const cors = require('cors'); // Import cors package
+const cors = require('cors');
+const crypto = require('crypto'); // Ensure crypto is imported
 
 // Initialize Express app
 const app = express();
 
 // Use cors middleware to allow requests from specific origin(s)
 app.use(cors({
-  origin: 'https://frontend-rho-dun.vercel.app', // Allow this origin
-  methods: ['GET', 'POST'], // Allow specific methods
-  allowedHeaders: ['Content-Type'] // Allow specific headers
+  origin: 'https://frontend-rho-dun.vercel.app',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
 }));
 
 app.use(bodyParser.json());
@@ -23,7 +24,7 @@ app.post('/api/shorten', (req, res) => {
 
   // Validate URL
   try {
-    new URL(originalUrl); // Throws error if invalid
+    new URL(originalUrl);
   } catch (_) {
     return res.status(400).json({ error: 'Invalid URL' });
   }
