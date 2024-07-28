@@ -30,7 +30,7 @@ app.post('/api/shorten', (req, res) => {
   urlDatabase.set(shortId, originalUrl);
 
   // Send the shortened URL
-  res.json({ shortUrl: `http://localhost:5000/${shortId}` });
+  res.json({ shortUrl: `https://url-shorter-frontend.vercel.app/${shortId}` });
 });
 
 
