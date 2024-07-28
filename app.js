@@ -1,22 +1,18 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const crypto = require('crypto');
 const cors = require('cors');
-const crypto = require('crypto'); // Ensure crypto is imported
 
 // Initialize Express app
 const app = express();
-
-// Use cors middleware to allow requests from specific origin(s)
-app.use(cors({
-  origin: 'https://frontend-rho-dun.vercel.app',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type']
-}));
-
 app.use(bodyParser.json());
+app.use(cors()); // Enable CORS for frontend requests
 
 // In-memory store for URLs
 const urlDatabase = new Map();
+
+// Helper function to create a random path
+const generateShortId = () => crypto.randomBytes(8).toString('hex');
 
 // Route to shorten URLs
 app.post('/api/shorten', (req, res) => {
@@ -24,18 +20,19 @@ app.post('/api/shorten', (req, res) => {
 
   // Validate URL
   try {
-    new URL(originalUrl);
+    new URL(originalUrl); // Throws error if invalid
   } catch (_) {
     return res.status(400).json({ error: 'Invalid URL' });
   }
 
-  // Generate a short ID
-  const shortId = crypto.randomBytes(6).toString('hex');
+  // Generate a unique short ID
+  const shortId = generateShortId();
   urlDatabase.set(shortId, originalUrl);
 
   // Send the shortened URL
-  res.json({ shortUrl: `https://backend-ruddy-zeta.vercel.app/${shortId}` });
+  res.json({ shortUrl: `http://localhost:5000/${shortId}` });
 });
+
 
 // Route to redirect to the original URL
 app.get('/:shortId', (req, res) => {
@@ -44,6 +41,19 @@ app.get('/:shortId', (req, res) => {
 
   if (originalUrl) {
     res.redirect(originalUrl);
+  } else {
+    res.status(404).send('URL not found');
+  }
+});
+
+// Route to check if URL is detected by Facebook
+app.get('/api/check-url/:shortId', (req, res) => {
+  const { shortId } = req.params;
+  const originalUrl = urlDatabase.get(shortId);
+
+  if (originalUrl) {
+    // Return some obfuscated response to avoid detection
+    res.json({ obfuscatedResponse: `You are being redirected to a URL` });
   } else {
     res.status(404).send('URL not found');
   }
